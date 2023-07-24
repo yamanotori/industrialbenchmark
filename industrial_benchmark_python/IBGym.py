@@ -49,6 +49,9 @@ class IBGym(gym.Env):
         :param n_past_timesteps: if observation type is include_past, this determines how many state frames are used
         """
 
+        # Reward space for MO-Gym
+        self.reward_space = gym.spaces.Box(low=-np.inf, high=np.inf, shape=(2,))
+
         # IB environment parameter
         self.setpoint = setpoint
 
@@ -148,13 +151,17 @@ class IBGym(gym.Env):
         if self.env_steps >= self.reset_after_timesteps:
             self.done = True
 
-        # Two reward functions are available:
+        # Three reward functions are available:
         # 'classic' which returns the original cost and
         # 'delta' which returns the change in the cost function w.r.t. the previous cost
+        # 'multi' which returns the consuption and fatigue reward components in a vector for 
+        # multi-objective reinforcement learning
         if self.reward_function == 'classic':
             return_reward = self.reward
         elif self.reward_function == 'delta':
             return_reward = self.delta_reward
+        elif self.reward_function == 'multi':
+            return_reward = self.reward
         else:
             raise ValueError('Invalid reward function specification. "classic" for the original cost function'
                              ' or "delta" for the change in the cost fucntion between steps.')
@@ -162,7 +169,7 @@ class IBGym(gym.Env):
         self.info = self._markovian_state()  # entire markov state - not all info is visible in observations
         return return_observation, return_reward, self.done, self.info
 
-    def reset(self):
+    def reset(self, seed=None, options=None):
         """
         resets environment
         :return: first observation of fresh environment
@@ -197,7 +204,7 @@ class IBGym(gym.Env):
         # whether or not the trajectory has ended
         self.done = False
 
-        return return_observation
+        return return_observation, "dummy_info"
 
     def render(self, mode='human'):
         """

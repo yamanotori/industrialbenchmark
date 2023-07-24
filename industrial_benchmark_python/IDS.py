@@ -92,6 +92,7 @@ class IDS(object):
         self.state['c'] = 0. # consumption
         self.state['cost'] = 0. #  signal/ total
         self.state['reward'] = 0. # reward
+        self.state['mo-reward'] = [0,0] # mo-reward
 
         self.init = True
         self.defineNewSequence()
@@ -249,10 +250,12 @@ class IDS(object):
     def updateCost(self):
         fatigue = self.state['f']
         consumption = self.state['c']
-        cost = self.CRF * fatigue + self.CRC * consumption
-
+        fin_fatigue = self.CRF * fatigue
+        fin_consumption = self.CRC * consumption
+        cost = fin_fatigue + fin_consumption
         self.state['cost'] =  cost
         self.state['reward'] = -cost
+        self.state['mo-reward'] = np.array([-fin_fatigue, -fin_consumption])
 
     def defineNewSequence(self):
         length = np.random.randint(1,100)
