@@ -167,7 +167,10 @@ class IBGym(gym.Env):
                              ' or "delta" for the change in the cost fucntion between steps.')
 
         self.info = self._markovian_state()  # entire markov state - not all info is visible in observations
-        return return_observation, return_reward, self.done, self.info
+
+        # TODO fix trunc return value
+        trunc = False
+        return return_observation, return_reward,  self.done, trunc, self.info
 
     def reset(self, seed=None, options=None):
         """
